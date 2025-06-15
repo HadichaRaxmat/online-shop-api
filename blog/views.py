@@ -1,5 +1,6 @@
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from .serializers import RegisterSerializer, AccountVerificationSerializer, LoginSerializer, DepositBalanceSerializer
 from rest_framework import status as Status
 
@@ -35,8 +36,10 @@ def LoginView(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def DepositBalanceView(request):
-    deposit_serializer = DepositBalanceSerializer(data=request.data)
+    deposit_serializer = DepositBalanceSerializer(data=request.data, context={'request': request})
     if deposit_serializer.is_valid():
-        return Response(deposit_serializer.validated_data, status=Status.HTTP_201_CREATED)
+        result = deposit_serializer.save()
+        return Response(result, status=Status.HTTP_201_CREATED)
     return Response(deposit_serializer.errors, status=Status.HTTP_400_BAD_REQUEST)

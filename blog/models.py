@@ -1,3 +1,5 @@
+import random
+
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
@@ -29,7 +31,7 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
-    balance = models.DecimalField (default=0.000, max_digits=10, decimal_places=3)
+    balance = models.DecimalField (default=0.000, max_digits=10, decimal_places=2)
 
     USERNAME_FIELD = "email"
     objects = CustomUserManager()
@@ -52,3 +54,17 @@ class AccountVerification(models.Model):
 
     def is_expired(self):
         return timezone.now() > self.expires_at
+
+
+class DepositPayment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    otp_code = models.IntegerField(max_length=6, unique=True)
+    amount = models.DecimalField(default=0.000, max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def generate_code():
+        return str(random.randint(100000, 999999))
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(minutes=5)

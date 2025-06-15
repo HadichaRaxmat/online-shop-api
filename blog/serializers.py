@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import MyUser, AccountVerification
 from .utils import send_verification_email
 from rest_framework_simplejwt.tokens import RefreshToken
+from decimal import Decimal
+from .models import DepositPayment
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -87,13 +89,32 @@ class LoginSerializer(serializers.Serializer):
 
 
 class DepositBalanceSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=10, decimal_places=3, min_value='0.01')
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal('0.01'))
     card_number = serializers.CharField(write_only=True, max_length=16)
     card_expiry = serializers.CharField(write_only=True, max_length=5)
     card_cvv = serializers.CharField(write_only=True, max_length=4, required=False)
+    otp_code = serializers.CharField(read_only=True, max_length=6)
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("The amount should be positive.")
+        return value
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        amount = validated_data['amount']
+        otp_code = DepositPayment.generate_code()
+        deposit = DepositPayment.objects.create(user=user, otp_code=otp_code, amount=amount)
+        deposit.save()
+        data = {
+            'amount': amount,
+            'otp_code': otp_code,
+            'message': 'OTP-код сгенерирован. Подтвердите пополнение.'
+
+        }
+        return data
 
 
-
-
-
+class ConfirmPayment(serializers.Serializer):
+    otp_code = serializers.IntegerField(max_value=6)
 
