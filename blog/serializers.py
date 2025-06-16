@@ -50,7 +50,6 @@ class AccountVerificationSerializer(serializers.Serializer):
             raise serializers.ValidationError('Unknown error')
 
         if verification.is_expired():
-            verification.delete()
             raise serializers.ValidationError('Code is expired')
 
         verification.delete()

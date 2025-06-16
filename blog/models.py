@@ -68,3 +68,4 @@ class DepositPayment(models.Model):
 
     def is_expired(self):
         return timezone.now() > self.created_at + timedelta(minutes=1)
+
