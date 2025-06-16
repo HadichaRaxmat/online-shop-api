@@ -86,7 +86,9 @@ class LoginSerializer(serializers.Serializer):
         }
 
 
-
+class UserProfileSerializer(serializers.Serializer):
+    email = serializers.EmailField(read_only=True)
+    balance = serializers.DecimalField(max_digits=10, decimal_places=2)
 
 class DepositBalanceSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal('0.01'))
@@ -150,3 +152,4 @@ class ConfirmDepositSerializer(serializers.Serializer):
         verification.delete()
 
         return data
+

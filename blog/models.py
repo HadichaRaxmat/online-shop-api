@@ -31,7 +31,7 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
-    balance = models.DecimalField (default=0.000, max_digits=10, decimal_places=2)
+    balance = models.DecimalField(default=0.000, max_digits=10, decimal_places=2)
 
     USERNAME_FIELD = "email"
     objects = CustomUserManager()
