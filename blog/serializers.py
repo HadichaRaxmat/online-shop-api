@@ -115,6 +115,38 @@ class DepositBalanceSerializer(serializers.Serializer):
         return data
 
 
-class ConfirmPayment(serializers.Serializer):
-    otp_code = serializers.IntegerField(max_value=6)
+class ConfirmDepositSerializer(serializers.Serializer):
+    otp_code = serializers.CharField(max_length=6)
 
+    def validate(self, data):
+        otp_code = data['otp_code']
+        verification = DepositPayment.objects.filter(otp_code=otp_code).first()
+        if not verification:
+            raise serializers.ValidationError("Otp code not found")
+
+        user = verification.user
+        if not user:
+            raise serializers.ValidationError("Code is invalid")
+
+        if verification.is_expired():
+            verification.delete()
+            raise serializers.ValidationError("Otp code is expired")
+
+        self.verification = verification
+        return data
+
+    def save(self, **kwargs):
+        verification = self.verification
+        user = verification.user
+        amount = verification.amount
+
+        user.balance += amount
+        user.save()
+        data = {
+            "message": "Deposit confirmed successfully.",
+            'balance': user.balance
+        }
+
+        verification.delete()
+
+        return data
