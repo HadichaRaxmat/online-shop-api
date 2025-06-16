@@ -58,7 +58,7 @@ class AccountVerification(models.Model):
 
 class DepositPayment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    otp_code = models.IntegerField(max_length=6, unique=True)
+    otp_code = models.IntegerField(unique=True)
     amount = models.DecimalField(default=0.000, max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -67,4 +67,4 @@ class DepositPayment(models.Model):
         return str(random.randint(100000, 999999))
 
     def is_expired(self):
-        return timezone.now() > self.created_at + timedelta(minutes=5)
+        return timezone.now() > self.created_at + timedelta(minutes=1)
