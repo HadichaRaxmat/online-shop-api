@@ -43,8 +43,8 @@ def UserProfileView(request):
         "email": user.email,
         "balance": user.balance
     }
-    profile_serializer = UserProfileSerializer(data)
-    return Response(profile_serializer.data)
+
+    return Response(data)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
