@@ -70,3 +70,8 @@ class DepositPayment(models.Model):
     def is_expired(self):
         return timezone.now() > self.created_at + timedelta(minutes=1)
 
+
+class Category(models.Model):
+    name =models.CharField(max_length=100)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+
